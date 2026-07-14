@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getDb, saveDb, Team } from '@/lib/db';
+import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
-import crypto from 'crypto';
 
 export async function GET() {
   try {
-    const db = await getDb();
-    // sort by createdAt
-    const teams = [...db.teams].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    const teams = await prisma.team.findMany({
+      orderBy: { createdAt: 'asc' },
+    });
     return NextResponse.json(teams);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch teams' }, { status: 500 });
@@ -26,16 +25,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
 
-    const db = await getDb();
-    const newTeam: Team = {
-      id: crypto.randomUUID(),
-      name,
-      createdAt: new Date().toISOString()
-    };
-    db.teams.push(newTeam);
-    await saveDb(db);
-    
-    return NextResponse.json(newTeam);
+    const team = await prisma.team.create({
+      data: { name, videoUrl: '' },
+    });
+    return NextResponse.json(team);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create team' }, { status: 500 });
   }
@@ -54,15 +47,15 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Team ID is required' }, { status: 400 });
     }
 
-    const db = await getDb();
-    
     // Delete associated votes first
-    db.votes = db.votes.filter(v => v.teamId !== id);
-    
+    await prisma.vote.deleteMany({
+      where: { teamId: id }
+    });
+
     // Delete the team
-    db.teams = db.teams.filter(t => t.id !== id);
-    
-    await saveDb(db);
+    await prisma.team.delete({
+      where: { id }
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
