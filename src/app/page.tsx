@@ -38,7 +38,7 @@ export default function WelcomePage() {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '1rem' }}>
-      <div className="glass-card" style={{ width: '100%', maxWidth: '450px' }}>
+      <div className="glass-card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center' }}>
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
           <h1 className="gradient-text" style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Prompt Party 2.0</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>Welcome to the Video Voting Portal!</p>

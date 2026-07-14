@@ -115,7 +115,7 @@ export default function DashboardPage() {
             <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Voting Dashboard</h1>
             <p style={{ color: 'var(--text-secondary)' }}>Hi <strong>{voterName}</strong>, please rate all {totalTeams} teams before submitting.</p>
           </div>
-          <div className="glass-card" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <div className="glass-card" style={{ padding: '1rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1.5rem', width: '100%', maxWidth: 'max-content' }}>
             <div>
               <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Progress</div>
               <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: allVoted ? 'var(--success)' : 'inherit' }}>

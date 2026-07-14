@@ -164,15 +164,15 @@ export default function AdminPage() {
         </div>
 
         {activeTab === 'summary' && (
-          <div className="glass-card">
-            <h2 style={{ marginBottom: '1.5rem' }}>Voting Summary</h2>
+          <div className="glass-card" style={{ marginTop: '2rem' }}>
+            <h3 style={{ marginBottom: '1.5rem' }}>Voting Summary</h3>
             <div style={{ overflowX: 'auto' }}>
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th>Team Name</th>
+                    <th>Team</th>
+                    <th>Average Rating</th>
                     <th>Total Votes</th>
-                    <th>Average Score</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -182,15 +182,20 @@ export default function AdminPage() {
                     const averageScore = totalVotes > 0 ? (teamVotes.reduce((acc, v) => acc + v.rating, 0) / totalVotes).toFixed(2) : '0.00';
                     return (
                       <tr key={team.id}>
-                        <td>{team.name}</td>
-                        <td>{totalVotes}</td>
-                        <td>{averageScore}</td>
+                        <td style={{ fontWeight: 500 }}>{team.name}</td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ color: '#fbbf24' }}>★</span>
+                            {averageScore} / 5
+                          </div>
+                        </td>
+                        <td>{totalVotes} votes</td>
                       </tr>
                     );
                   })}
                   {teams.length === 0 && (
                     <tr>
-                      <td colSpan={3} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>No teams found.</td>
+                      <td colSpan={3} style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>No votes recorded yet.</td>
                     </tr>
                   )}
                 </tbody>
@@ -253,7 +258,7 @@ export default function AdminPage() {
         )}
 
         {activeTab === 'users' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem' }}>
+          <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem' }}>
             <div className="glass-card">
               <h3 style={{ marginBottom: '1.5rem' }}>Add Voter</h3>
               <form onSubmit={handleCreateUser}>
@@ -278,15 +283,15 @@ export default function AdminPage() {
             </div>
             
             <div className="glass-card">
-              <h3 style={{ marginBottom: '1.5rem' }}>All Users</h3>
-              <div style={{ overflowX: 'auto', maxHeight: '500px' }}>
+              <h3 style={{ marginBottom: '1.5rem' }}>Registered Users</h3>
+              <div style={{ overflowX: 'auto' }}>
                 <table className="admin-table">
                   <thead>
                     <tr>
                       <th>Name</th>
                       <th>Username</th>
                       <th>Role</th>
-                      <th>Actions</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -294,10 +299,12 @@ export default function AdminPage() {
                       <tr key={u.id}>
                         <td>{u.name}</td>
                         <td>{u.username}</td>
-                        <td>{u.isAdmin ? <span className="badge badge-success">Admin</span> : <span className="badge" style={{ background: 'var(--glass-bg)', border: '1px solid var(--border-color)' }}>Voter</span>}</td>
+                        <td>
+                          {u.isAdmin ? <span className="badge badge-success">Admin</span> : <span className="badge" style={{ background: 'rgba(255,255,255,0.1)' }}>Voter</span>}
+                        </td>
                         <td>
                           {u.username !== 'admin' && (
-                            <button className="btn btn-danger" style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem' }} onClick={() => handleDeleteUser(u.id, u.username)}>Delete</button>
+                            <button onClick={() => handleDeleteUser(u.id, u.username)} className="btn btn-danger" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}>Delete</button>
                           )}
                         </td>
                       </tr>
@@ -310,7 +317,7 @@ export default function AdminPage() {
         )}
 
         {activeTab === 'teams' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem' }}>
+          <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem' }}>
             <div className="glass-card">
               <h3 style={{ marginBottom: '1.5rem' }}>Add Team</h3>
               <form onSubmit={handleCreateTeam}>
@@ -323,13 +330,13 @@ export default function AdminPage() {
             </div>
             
             <div className="glass-card">
-              <h3 style={{ marginBottom: '1.5rem' }}>All Teams</h3>
-              <div style={{ overflowX: 'auto', maxHeight: '500px' }}>
+              <h3 style={{ marginBottom: '1.5rem' }}>Current Teams</h3>
+              <div style={{ overflowX: 'auto' }}>
                 <table className="admin-table">
                   <thead>
                     <tr>
                       <th>Team Name</th>
-                      <th>Actions</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -337,7 +344,7 @@ export default function AdminPage() {
                       <tr key={t.id}>
                         <td>{t.name}</td>
                         <td>
-                          <button className="btn btn-danger" style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem' }} onClick={() => handleDeleteTeam(t.id)}>Delete</button>
+                          <button onClick={() => handleDeleteTeam(t.id)} className="btn btn-danger" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}>Delete</button>
                         </td>
                       </tr>
                     ))}
