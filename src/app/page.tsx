@@ -71,7 +71,7 @@ export default function WelcomePage() {
         </form>
         
         <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-           <button onClick={() => router.push('/admin')} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'underline' }}>Admin Login</button>
+           <button onClick={() => router.push('/login')} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'underline' }}>Admin Login</button>
         </div>
       </div>
     </div>
