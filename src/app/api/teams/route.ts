@@ -5,7 +5,7 @@ import crypto from 'crypto';
 
 export async function GET() {
   try {
-    const db = getDb();
+    const db = await getDb();
     // sort by createdAt
     const teams = [...db.teams].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     return NextResponse.json(teams);
@@ -26,14 +26,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
 
-    const db = getDb();
+    const db = await getDb();
     const newTeam: Team = {
       id: crypto.randomUUID(),
       name,
       createdAt: new Date().toISOString()
     };
     db.teams.push(newTeam);
-    saveDb(db);
+    await saveDb(db);
     
     return NextResponse.json(newTeam);
   } catch (error) {
@@ -54,7 +54,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Team ID is required' }, { status: 400 });
     }
 
-    const db = getDb();
+    const db = await getDb();
     
     // Delete associated votes first
     db.votes = db.votes.filter(v => v.teamId !== id);
@@ -62,7 +62,7 @@ export async function DELETE(request: Request) {
     // Delete the team
     db.teams = db.teams.filter(t => t.id !== id);
     
-    saveDb(db);
+    await saveDb(db);
 
     return NextResponse.json({ success: true });
   } catch (error) {

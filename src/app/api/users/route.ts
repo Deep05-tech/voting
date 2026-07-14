@@ -11,7 +11,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const db = getDb();
+    const db = await getDb();
     const users = [...db.users]
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .map(u => ({ id: u.id, name: u.name, username: u.username, isAdmin: u.isAdmin, createdAt: u.createdAt }));
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const db = getDb();
+    const db = await getDb();
     const existingUser = db.users.find(u => u.username === username);
     if (existingUser) {
       return NextResponse.json({ error: 'Username already exists' }, { status: 400 });
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     };
     
     db.users.push(newUser);
-    saveDb(db);
+    await saveDb(db);
     
     return NextResponse.json({ id: newUser.id, name: newUser.name, username: newUser.username, isAdmin: newUser.isAdmin });
   } catch (error) {
@@ -72,7 +72,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    const db = getDb();
+    const db = await getDb();
     const userToDelete = db.users.find(u => u.id === id);
     if (!userToDelete) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -83,7 +83,7 @@ export async function DELETE(request: Request) {
     }
 
     db.users = db.users.filter(u => u.id !== id);
-    saveDb(db);
+    await saveDb(db);
 
     return NextResponse.json({ success: true });
   } catch (error) {

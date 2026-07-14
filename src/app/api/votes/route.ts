@@ -11,7 +11,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const db = getDb();
+    const db = await getDb();
     
     // We need to attach team info to each vote to match the old Prisma relation structure
     const votesWithTeams = [...db.votes]
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     }
 
     const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'Unknown';
-    const db = getDb();
+    const db = await getDb();
 
     // Check if session ID has already voted to prevent duplicate bulk submit
     const existingVote = db.votes.find(v => v.sessionId === sessionId);
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     }));
 
     db.votes.push(...newVotes);
-    saveDb(db);
+    await saveDb(db);
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -82,9 +82,9 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Vote ID is required' }, { status: 400 });
     }
 
-    const db = getDb();
+    const db = await getDb();
     db.votes = db.votes.filter(v => v.id !== id);
-    saveDb(db);
+    await saveDb(db);
 
     return NextResponse.json({ success: true });
   } catch (error) {

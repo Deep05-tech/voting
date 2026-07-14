@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Username and password are required' }, { status: 400 });
     }
 
-    const db = getDb();
+    const db = await getDb();
     const user = db.users.find(u => u.username === username);
 
     if (!user || !user.password) {
