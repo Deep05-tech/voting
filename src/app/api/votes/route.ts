@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { getDb, saveDb, Vote } from '@/lib/db';
 import { getSession } from '@/lib/auth';
+import crypto from 'crypto';
 
 export async function GET() {
   try {
@@ -10,13 +11,20 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const votes = await prisma.vote.findMany({
-      include: {
-        team: { select: { name: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-    return NextResponse.json(votes);
+    const db = getDb();
+    
+    // We need to attach team info to each vote to match the old Prisma relation structure
+    const votesWithTeams = [...db.votes]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .map(v => {
+        const team = db.teams.find(t => t.id === v.teamId);
+        return {
+          ...v,
+          team: { name: team ? team.name : 'Unknown Team' }
+        };
+      });
+      
+    return NextResponse.json(votesWithTeams);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch votes' }, { status: 500 });
   }
@@ -31,31 +39,28 @@ export async function POST(request: Request) {
     }
 
     const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'Unknown';
+    const db = getDb();
 
-    // Check if session ID has already voted for any of these teams to prevent duplicate bulk submit
-    const existingVote = await prisma.vote.findFirst({
-      where: {
-        sessionId,
-      },
-    });
-
+    // Check if session ID has already voted to prevent duplicate bulk submit
+    const existingVote = db.votes.find(v => v.sessionId === sessionId);
     if (existingVote) {
       return NextResponse.json({ error: 'You have already submitted your votes.' }, { status: 400 });
     }
 
-    // Prepare data for bulk insert
-    const dataToInsert = votes.map((v: any) => ({
+    const timestamp = new Date().toISOString();
+    
+    const newVotes: Vote[] = votes.map((v: any) => ({
+      id: crypto.randomUUID(),
       rating: v.rating,
       teamId: v.teamId,
       voterName,
       sessionId,
-      ipAddress
+      ipAddress,
+      createdAt: timestamp
     }));
 
-    // Insert all in a transaction
-    await prisma.$transaction(
-      dataToInsert.map((data: any) => prisma.vote.create({ data }))
-    );
+    db.votes.push(...newVotes);
+    saveDb(db);
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -77,9 +82,9 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Vote ID is required' }, { status: 400 });
     }
 
-    await prisma.vote.delete({
-      where: { id }
-    });
+    const db = getDb();
+    db.votes = db.votes.filter(v => v.id !== id);
+    saveDb(db);
 
     return NextResponse.json({ success: true });
   } catch (error) {
